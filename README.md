@@ -21,6 +21,14 @@ docker run -d --rm \
   -t michibiki/starrupture-dedicated-server
 ```
 
+### Environment variables
+
+| Name | Default | Description |
+| --- | --- | --- |
+| `SERVER_DATA_DIR` | `/opt/starrupture` | Directory where server data and installed files are stored. |
+| `PORT` | `7777` | TCP/UDP port used by the server process. |
+| `SKIP_STEAMCMD_INIT` | `0` | If set (non-empty), skip steamcmd initialization/validation for faster startup. |
+
 ### Skip steamcmd validation (faster startup)
 
 ```bash
@@ -59,6 +67,14 @@ docker run -d --rm \
   -v /data:/opt \
   -t michibiki/starrupture-dedicated-server
 ```
+
+### 環境変数
+
+| 変数名 | デフォルト | 説明 |
+| --- | --- | --- |
+| `SERVER_DATA_DIR` | `/opt/starrupture` | サーバデータとインストール済みファイルの保存先ディレクトリ。 |
+| `PORT` | `7777` | サーバプロセスが使用する TCP/UDP ポート。 |
+| `SKIP_STEAMCMD_INIT` | `0` | 設定（空でない）されている場合は steamcmd の初期化/検証をスキップして起動を短縮します。 |
 
 ### steamcmd の検証をスキップ（起動を短縮）
 
