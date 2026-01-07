@@ -6,6 +6,7 @@ This container runs the StarRupture dedicated server under supervisord.
 
 ### Requirements
 - A persistent volume mount is required to keep server data.
+- Ensure the persistent storage is writable by `10000:10000` (steam user/group).
 - You must expose both TCP and UDP on the same PORT.
 - Set the PORT environment variable.
 - Players must connect from the game client using the server's public IP.
@@ -53,6 +54,7 @@ docker exec -it <container-name-or-id> supervisorctl restart starrupture-server
 
 ### 必須事項
 - サーバデータを保持するため、永続ボリュームのマウントが必要です。
+- 永続記憶領域のパーミッションは `10000:10000`（steam ユーザ/グループ）で書き込み可能にしてください。
 - TCP/UDP を同じ PORT で公開してください。
 - PORT 環境変数を指定してください。
 - ゲームクライアントからの接続にはサーバの Public IP を使用してください。
