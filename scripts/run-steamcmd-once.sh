@@ -23,14 +23,19 @@ if [[ "${SKIP_STEAMCMD_INIT}" == "1" && -n "$(ls -A "${SERVER_DATA_DIR}")" ]]; t
 fi
 
 if [[ -f "${stamp_file}" ]]; then
-  echo "steamcmd stamp present; re-running because SKIP_STEAMCMD_INIT is not set"
+  /home/steam/steamcmd/steamcmd.sh \
+    +force_install_dir "${SERVER_DATA_DIR}" \
+    +login anonymous \
+    +app_update 3809400 validate \
+    +quit
+else
+  /home/steam/steamcmd/steamcmd.sh \
+    +@sSteamCmdForcePlatformType windows \
+    +force_install_dir "${SERVER_DATA_DIR}" \
+    +login anonymous \
+    +app_update 3809400 validate \
+    +quit
 fi
 
-/home/steam/steamcmd/steamcmd.sh \
-  +@sSteamCmdForcePlatformType windows \
-  +force_install_dir "${SERVER_DATA_DIR}" \
-  +login anonymous \
-  +app_update 3809400 validate \
-  +quit
-
+SKIP_STEAMCMD_INIT=1
 touch "${stamp_file}"

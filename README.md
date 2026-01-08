@@ -45,12 +45,6 @@ docker run -d --rm \
   -t michibiki/starrupture-dedicated-server
 ```
 
-### Restart server process
-
-```bash
-docker exec -it <container-name-or-id> supervisorctl restart starrupture-server
-```
-
 ## 日本語
 
 このコンテナは supervisord で StarRupture の専用サーバを実行します。
@@ -94,10 +88,4 @@ docker run -d --rm \
   -v /data:/opt \
   -v ./savedata:/home/steam/starrupture/savedata \
   -t michibiki/starrupture-dedicated-server
-```
-
-### サーバプロセスの再起動
-
-```bash
-docker exec -it <container-name-or-id> supervisorctl restart starrupture-server
 ```

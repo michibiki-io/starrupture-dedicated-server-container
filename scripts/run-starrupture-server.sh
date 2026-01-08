@@ -7,15 +7,20 @@ set -euo pipefail
 
 stamp_file="${SERVER_DATA_DIR}/.steamcmd_initialized"
 lock_file="/tmp/.steamcmd_running"
+server_started_file="/tmp/.server_started"
 
-if [[ "${SKIP_STEAMCMD_INIT:-}" == "1" && -n "$(ls -A "${SERVER_DATA_DIR}")" ]]; then
-  while [[ ! -f "${stamp_file}" ]]; do
-    sleep 2
-  done
-else
-  while [[ ! -f "${lock_file}" ]]; do
-    sleep 1
-  done
+if [[ ! -f "${server_started_file}" ]]; then
+  if [[ -f "${stamp_file}" ]]; then
+    waited=0
+    while [[ ! -f "${lock_file}" && "${waited}" -lt 10 ]]; do
+      sleep 1
+      waited=$((waited + 1))
+    done
+  else
+    while [[ ! -f "${stamp_file}" && ! -f "${lock_file}" ]]; do
+      sleep 1
+    done
+  fi
   while [[ -f "${lock_file}" ]]; do
     sleep 2
   done
@@ -54,10 +59,13 @@ else
 fi
 
 cleanup() {
-  pkill -TERM -f StarRuptureServerEOS.exe || true
-  pkill -TERM -f wineserver || true
-  pkill -TERM -f "Z:" || true
-  pkill -TERM -f "C:" || true
+  if [[ -n "${server_pid:-}" ]]; then
+    kill -TERM -"${server_pid}" 2>/dev/null || true
+  fi
+  sleep 2
+  if [[ -n "${server_pid:-}" ]]; then
+    kill -KILL -"${server_pid}" 2>/dev/null || true
+  fi
 }
 
 term_handler() {
@@ -67,11 +75,38 @@ term_handler() {
   exit "${status}"
 }
 
+random_guid() {
+  if command -v uuidgen >/dev/null 2>&1; then
+    uuidgen
+  else
+    cat /proc/sys/kernel/random/uuid
+  fi
+}
+
+update_machine_guid() {
+  local guid=""
+  guid="$(random_guid)"
+  if ! xvfb-run -a wine reg add 'HKCU\Software\Epic Games\Unreal Engine\Identifiers' \
+    /v 'MachineId' /t REG_SZ /d "${guid}" /f >/dev/null 2>&1; then
+    echo "Failed to update Epic MachineId" >&2
+    exit 1
+  fi
+  echo "Updated MachineGuid to ${guid}"
+}
+
 trap 'term_handler 143' TERM
 trap 'term_handler 130' INT
 trap 'term_handler $?' EXIT
 
-wine64 "${SERVER_DATA_DIR}/StarRuptureServerEOS.exe" -Log -Port="${PORT}" &
+if ! touch "${server_started_file}"; then
+  echo "Failed to write server started marker: ${server_started_file}" >&2
+  exit 1
+fi
+
+update_machine_guid
+
+server_pid=""
+xvfb-run wine "${SERVER_DATA_DIR}/StarRuptureServerEOS.exe" -Log -Port="${PORT}" &
 server_pid=$!
 
 wait "${server_pid}"
