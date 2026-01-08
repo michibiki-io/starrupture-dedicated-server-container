@@ -74,11 +74,11 @@ WORKDIR /home/steam
 # --- root に戻る ---
 USER root
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY run-steamcmd-once.sh /usr/local/bin/run-steamcmd-once.sh
-COPY run-starrupture-server.sh /usr/local/bin/run-starrupture-server.sh
-COPY supervisorctl /usr/local/bin/supervisorctl
-COPY supervisord.conf /etc/supervisord.conf
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY scripts/run-steamcmd-once.sh /usr/local/bin/run-steamcmd-once.sh
+COPY scripts/run-starrupture-server.sh /usr/local/bin/run-starrupture-server.sh
+COPY scripts/supervisorctl /usr/local/bin/supervisorctl
+COPY scripts/supervisord.conf /etc/supervisord.conf
 RUN set -eux; \
   chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/run-steamcmd-once.sh /usr/local/bin/run-starrupture-server.sh /usr/local/bin/supervisorctl
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
