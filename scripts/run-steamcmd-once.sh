@@ -2,21 +2,28 @@
 set -euo pipefail
 
 : "${SERVER_DATA_DIR:=/opt/starrupture}"
-: "${SKIP_STEAMCMD_INIT:=}"
+: "${SKIP_STEAMCMD_INIT:=0}"
 
 stamp_file="${SERVER_DATA_DIR}/.steamcmd_initialized"
+lock_file="/tmp/.steamcmd_running"
 
 mkdir -p "${SERVER_DATA_DIR}"
 
-if [[ -n "${SKIP_STEAMCMD_INIT}" ]]; then
-  echo "SKIP_STEAMCMD_INIT is set; skipping steamcmd initialization"
+cleanup_lock() {
+  rm -f "${lock_file}"
+}
+trap cleanup_lock EXIT
+
+touch "${lock_file}"
+
+if [[ "${SKIP_STEAMCMD_INIT}" == "1" && -n "$(ls -A "${SERVER_DATA_DIR}")" ]]; then
+  echo "SKIP_STEAMCMD_INIT=1 and SERVER_DATA_DIR is not empty; skipping steamcmd initialization"
   touch "${stamp_file}"
   exit 0
 fi
 
 if [[ -f "${stamp_file}" ]]; then
-  echo "steamcmd already initialized at ${SERVER_DATA_DIR}"
-  exit 0
+  echo "steamcmd stamp present; re-running because SKIP_STEAMCMD_INIT is not set"
 fi
 
 /home/steam/steamcmd/steamcmd.sh \

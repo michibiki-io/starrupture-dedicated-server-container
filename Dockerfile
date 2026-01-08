@@ -39,6 +39,7 @@ ENV WINETRICKS_CACHE=/home/steam/.cache/winetricks
 ENV WINEDEBUG=-all
 ENV XDG_RUNTIME_DIR=/tmp/xdg-steam
 ENV SERVER_DATA_DIR=/opt/starrupture
+ENV SERVER_SAVE_DIR=/home/steam/starrupture/savedata
 ENV SKIP_STEAMCMD_INIT=0
 
 # XDG runtime とキャッシュディレクトリ準備
