@@ -19,6 +19,7 @@ docker run -d --rm \
   -p 32768:32768/tcp \
   -p 32768:32768/udp \
   -v /data:/opt \
+  -v ./savedata:/home/steam/starrupture/savedata \
   -t michibiki/starrupture-dedicated-server
 ```
 
@@ -91,6 +92,7 @@ docker run -d --rm \
   -p 32768:32768/tcp \
   -p 32768:32768/udp \
   -v /data:/opt \
+  -v ./savedata:/home/steam/starrupture/savedata \
   -t michibiki/starrupture-dedicated-server
 ```
 
