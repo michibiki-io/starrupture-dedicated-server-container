@@ -11,12 +11,24 @@ while [[ ! -f "${stamp_file}" ]]; do
 done
 
 cleanup() {
-  wineboot -k || true
-  wineserver -k || true
-  wineserver64 -k || true
-  pkill -f wineserver || true
+  pkill -TERM -f StarRuptureServerEOS.exe || true
+  pkill -TERM -f wineserver || true
+  pkill -TERM -f "Z:" || true
+  pkill -TERM -f "C:" || true
 }
 
-trap cleanup TERM INT
+term_handler() {
+  local status=0
+  status="${1:-0}"
+  cleanup
+  exit "${status}"
+}
 
-exec wine64 "${SERVER_DATA_DIR}/StarRuptureServerEOS.exe" -Log -Port="${PORT}"
+trap 'term_handler 143' TERM
+trap 'term_handler 130' INT
+trap 'term_handler $?' EXIT
+
+wine64 "${SERVER_DATA_DIR}/StarRuptureServerEOS.exe" -Log -Port="${PORT}" &
+server_pid=$!
+
+wait "${server_pid}"
