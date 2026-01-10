@@ -34,6 +34,12 @@ if [[ "${SKIP_STEAMCMD_INIT}" == "1" && -f "${stamp_file}" ]]; then
 fi
 
 if /home/steam/steamcmd/steamcmd.sh \
+  +login anonymous \
+  +quit; then
+  sleep 3
+fi
+
+if /home/steam/steamcmd/steamcmd.sh \
   +@sSteamCmdForcePlatformType windows \
   +force_install_dir "${SERVER_DATA_DIR}" \
   +login anonymous \
