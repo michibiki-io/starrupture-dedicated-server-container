@@ -27,14 +27,6 @@ RUN set -eux; \
 
 ENV PATH=$PATH:/usr/lib/wine
 
-COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY scripts/run-steamcmd-once.sh /usr/local/bin/run-steamcmd-once.sh
-COPY scripts/run-starrupture-server.sh /usr/local/bin/run-starrupture-server.sh
-COPY scripts/supervisorctl /usr/local/bin/supervisorctl
-COPY scripts/supervisord.conf /etc/supervisord.conf
-RUN set -eux; \
-  chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/run-steamcmd-once.sh /usr/local/bin/run-starrupture-server.sh /usr/local/bin/supervisorctl
-
 # starrupture 用データディレクトリ作成 (ホストマウント想定)
 RUN mkdir -p /opt/starrupture; \
   chown steam:steam /opt/starrupture
@@ -81,6 +73,20 @@ RUN set -eux; \
   cd steamcmd; \
   curl -sSL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -; \
   chmod +x steamcmd.sh
+
+# entrypoint スクリプト追加
+USER root
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY scripts/run-steamcmd-once.sh /usr/local/bin/run-steamcmd-once.sh
+COPY scripts/run-starrupture-server.sh /usr/local/bin/run-starrupture-server.sh
+COPY scripts/supervisorctl /usr/local/bin/supervisorctl
+COPY scripts/supervisord.conf /etc/supervisord.conf
+RUN set -eux; \
+  chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/run-steamcmd-once.sh /usr/local/bin/run-starrupture-server.sh /usr/local/bin/supervisorctl
+
+# --- ここから非 root ---
+USER steam
+ENV HOME=/home/steam
 
 WORKDIR /home/steam
 

@@ -6,22 +6,11 @@ set -euo pipefail
 : "${PORT:=7777}"
 
 stamp_file="${SERVER_DATA_DIR}/.steamcmd_initialized"
-lock_file="/tmp/.steamcmd_running"
+success_file="/tmp/.successful_steamcmd_run"
 server_started_file="/tmp/.server_started"
 
 if [[ ! -f "${server_started_file}" ]]; then
-  if [[ -f "${stamp_file}" ]]; then
-    waited=0
-    while [[ ! -f "${lock_file}" && "${waited}" -lt 10 ]]; do
-      sleep 1
-      waited=$((waited + 1))
-    done
-  else
-    while [[ ! -f "${stamp_file}" && ! -f "${lock_file}" ]]; do
-      sleep 1
-    done
-  fi
-  while [[ -f "${lock_file}" ]]; do
+  while [[ ! -f "${success_file}" ]]; do
     sleep 2
   done
   while [[ ! -f "${stamp_file}" ]]; do
