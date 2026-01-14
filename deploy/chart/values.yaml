@@ -1,0 +1,72 @@
+replicaCount: 1
+
+image:
+  repository: michibiki/starrupture-dedicated-server
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 10000
+
+securityContext:
+  runAsUser: 10000
+  runAsGroup: 10000
+  runAsNonRoot: true
+
+initContainer:
+  enabled: true
+  image: busybox:1.36
+  pullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+
+service:
+  type: ClusterIP
+  port: 7777
+  nodePorts:
+    tcp: null
+    udp: null
+
+env:
+  serverDataDir: /opt/starrupture
+  serverSaveDir: /home/steam/starrupture/savedata
+  skipSteamcmdInit: false
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+persistence:
+  serverData:
+    enabled: true
+    existingClaim: ""
+    size: 30Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ""
+    mountPath: /opt/starrupture
+    pv:
+      hostPath: ""
+  saveData:
+    enabled: true
+    existingClaim: ""
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ""
+    mountPath: /home/steam/starrupture/savedata
+    pv:
+      hostPath: ""

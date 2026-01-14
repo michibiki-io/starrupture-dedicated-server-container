@@ -1,0 +1,86 @@
+{{- if .Values.persistence.serverData.enabled }}
+{{- if and (not .Values.persistence.serverData.existingClaim) .Values.persistence.serverData.pv.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "starrupture-dedicated-server.fullname" . }}-server-data-pv
+  labels:
+    {{- include "starrupture-dedicated-server.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.serverData.size }}
+  accessModes:
+    {{- toYaml .Values.persistence.serverData.accessModes | nindent 4 }}
+  {{ if eq .Values.persistence.serverData.storageClassName "-" }}
+  storageClassName: ""
+  {{ else if .Values.persistence.serverData.storageClassName }}
+  storageClassName: {{ .Values.persistence.serverData.storageClassName | quote }}
+  {{ end }}
+  hostPath:
+    path: {{ required "persistence.serverData.pv.hostPath is required to create a hostPath PV" .Values.persistence.serverData.pv.hostPath }}
+{{- end }}
+{{- if not .Values.persistence.serverData.existingClaim }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "starrupture-dedicated-server.fullname" . }}-server-data
+  labels:
+    {{- include "starrupture-dedicated-server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.serverData.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.serverData.size }}
+  {{ if eq .Values.persistence.serverData.storageClassName "-" }}
+  storageClassName: ""
+  {{ else if .Values.persistence.serverData.storageClassName }}
+  storageClassName: {{ .Values.persistence.serverData.storageClassName | quote }}
+  {{ end }}
+{{- end }}
+{{- end }}
+{{- if .Values.persistence.saveData.enabled }}
+{{- if and (not .Values.persistence.saveData.existingClaim) .Values.persistence.saveData.pv.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "starrupture-dedicated-server.fullname" . }}-save-data-pv
+  labels:
+    {{- include "starrupture-dedicated-server.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.saveData.size }}
+  accessModes:
+    {{- toYaml .Values.persistence.saveData.accessModes | nindent 4 }}
+  {{ if eq .Values.persistence.saveData.storageClassName "-" }}
+  storageClassName: ""
+  {{ else if .Values.persistence.saveData.storageClassName }}
+  storageClassName: {{ .Values.persistence.saveData.storageClassName | quote }}
+  {{ end }}
+  hostPath:
+    path: {{ required "persistence.saveData.pv.hostPath is required to create a hostPath PV" .Values.persistence.saveData.pv.hostPath }}
+{{- end }}
+{{- if not .Values.persistence.saveData.existingClaim }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "starrupture-dedicated-server.fullname" . }}-save-data
+  labels:
+    {{- include "starrupture-dedicated-server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.saveData.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.saveData.size }}
+  {{ if eq .Values.persistence.saveData.storageClassName "-" }}
+  storageClassName: ""
+  {{ else if .Values.persistence.saveData.storageClassName }}
+  storageClassName: {{ .Values.persistence.saveData.storageClassName | quote }}
+  {{ end }}
+{{- end }}
+{{- end }}

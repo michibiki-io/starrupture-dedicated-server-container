@@ -1,0 +1,6 @@
+The StarRupture dedicated server is deployed.
+
+Check service:
+  kubectl get svc {{ include "starrupture-dedicated-server.fullname" . }}
+
+If you enabled NodePort, connect via the node IP and the NodePort for TCP/UDP.

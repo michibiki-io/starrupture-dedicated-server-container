@@ -1,0 +1,116 @@
+{{- $useServerDataPvc := .Values.persistence.serverData.enabled -}}
+{{- $useSaveDataPvc := .Values.persistence.saveData.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "starrupture-dedicated-server.fullname" . }}
+  labels:
+    {{- include "starrupture-dedicated-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "starrupture-dedicated-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "starrupture-dedicated-server.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "starrupture-dedicated-server.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.initContainer.enabled }}
+      initContainers:
+        - name: init-permissions
+          image: "{{ .Values.initContainer.image }}"
+          imagePullPolicy: {{ .Values.initContainer.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - >
+              set -e;
+              chown -R 10000:10000 {{ .Values.persistence.serverData.mountPath }};
+              chown -R 10000:10000 {{ .Values.persistence.saveData.mountPath }};
+          {{- with .Values.initContainer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: server-data
+              mountPath: {{ .Values.persistence.serverData.mountPath }}
+            - name: save-data
+              mountPath: {{ .Values.persistence.saveData.mountPath }}
+      {{- end }}
+      containers:
+        - name: server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: tcp
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: udp
+              containerPort: {{ .Values.service.port }}
+              protocol: UDP
+          env:
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+            - name: SERVER_DATA_DIR
+              value: {{ .Values.env.serverDataDir | quote }}
+            - name: SERVER_SAVE_DIR
+              value: {{ .Values.env.serverSaveDir | quote }}
+            - name: SKIP_STEAMCMD_INIT
+              value: {{ ternary "1" "0" .Values.env.skipSteamcmdInit | quote }}
+          volumeMounts:
+            - name: server-data
+              mountPath: {{ .Values.persistence.serverData.mountPath }}
+            - name: save-data
+              mountPath: {{ .Values.persistence.saveData.mountPath }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: server-data
+          {{ if $useServerDataPvc }}
+          persistentVolumeClaim:
+            claimName: {{ default (printf "%s-server-data" (include "starrupture-dedicated-server.fullname" .)) .Values.persistence.serverData.existingClaim }}
+          {{ else }}
+          emptyDir: {}
+          {{ end }}
+        - name: save-data
+          {{ if $useSaveDataPvc }}
+          persistentVolumeClaim:
+            claimName: {{ default (printf "%s-save-data" (include "starrupture-dedicated-server.fullname" .)) .Values.persistence.saveData.existingClaim }}
+          {{ else }}
+          emptyDir: {}
+          {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
